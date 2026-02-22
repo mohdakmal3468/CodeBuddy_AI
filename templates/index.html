@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CodeBuddy AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🤖 CodeBuddy AI</h1>
+
+    <form method="post" id="reviewForm">
+      <textarea id="codeInput" name="code" rows="10" placeholder="Paste your code here..."></textarea>
+
+      <div class="controls">
+        <select name="language">
+          <option value="python">Python</option>
+          <option value="cpp">C++</option>
+          <option value="java">Java</option>
+        </select>
+
+        <button type="submit">Review</button>
+        <button type="button" id="clearBtn">Clear</button>
+      </div>
+
+      <p class="counter"><span id="charCount">0</span> characters</p>
+    </form>
+
+    <div id="loader" class="loader hidden">🧠 AI is thinking...</div>
+
+    {% if response %}
+    <div class="result fade-in">
+        <div class="result-actions">
+            <button id="copyBtn">📋 Copy</button>
+            <button id="speakBtn">🔊 Speak</button>
+            <button id="stopBtn">⏹ Stop</button>
+        </div>
+
+        <pre><code class="language-python" id="aiResult">{{ response }}</code></pre>
+    </div>
+    {% endif %}
+
+    <button id="toggleTheme">🌙 Toggle Dark Mode</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+
+  <script>
+    const form = document.getElementById("reviewForm");
+    const loader = document.getElementById("loader");
+    const input = document.getElementById("codeInput");
+    const charCount = document.getElementById("charCount");
+    const clearBtn = document.getElementById("clearBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const toggleTheme = document.getElementById("toggleTheme");
+
+    form.addEventListener("submit", () => {
+      loader.classList.remove("hidden");
+    });
+
+    input.addEventListener("input", () => {
+      charCount.textContent = input.value.length;
+    });
+
+    clearBtn.addEventListener("click", () => {
+      input.value = "";
+      charCount.textContent = 0;
+    });
+
+    if (copyBtn) {
+      copyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(document.querySelector(".result pre").innerText);
+        copyBtn.innerText = "✅ Copied!";
+      });
+    }
+
+    toggleTheme.addEventListener("click", () => {
+    const isDark = document.body.classList.toggle("dark");
+
+    toggleTheme.innerText = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
+        });
+
+    // 🔊 Text-to-Speech Feature
+    let speech;
+
+    const speakBtn = document.getElementById("speakBtn");
+    const stopBtn = document.getElementById("stopBtn");
+
+    if (speakBtn) {
+        speakBtn.addEventListener("click", () => {
+        const text = document.getElementById("aiResult").innerText;
+
+        speech = new SpeechSynthesisUtterance(text);
+        speech.lang = "en-US";
+        speech.rate = 1;
+        speech.pitch = 1;
+
+        window.speechSynthesis.speak(speech);
+        });
+    }
+
+    if (stopBtn) {
+        stopBtn.addEventListener("click", () => {
+        window.speechSynthesis.cancel();
+       });
+    }
+  </script>
+</body>
+</html>
